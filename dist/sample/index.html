@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Medium Editor Embed Button Example</title>
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/medium-editor/latest/css/medium-editor.min.css" type="text/css" media="screen" charset="utf-8">
+    <link rel="stylesheet" href="../css/medium-editor-embed-button.min.css" type="text/css" media="screen" charset="utf-8">
+    <script src="https://use.fontawesome.com/d9bbf7bdcd.js"></script>
+    <style>
+        .medium-toolbar-arrow-under:after{border-color:#2f1e07 transparent transparent;top:60px}.medium-toolbar-arrow-over:before{border-color:transparent transparent #2f1e07}.medium-editor-toolbar{background-color:#2f1e07;border:1px solid #5b3a0e;border-radius:6px}.medium-editor-toolbar li button{background-color:transparent;border:none;border-right:1px solid #5b3a0e;box-sizing:border-box;color:#ffedd5;height:60px;min-width:60px;-webkit-transition:background-color .2s ease-in,color .2s ease-in;transition:background-color .2s ease-in,color .2s ease-in}.medium-editor-toolbar li .medium-editor-button-active,.medium-editor-toolbar li button:hover{background-color:#030200;color:#ffedd5}.medium-editor-toolbar li .medium-editor-button-first{border-bottom-left-radius:6px;border-top-left-radius:6px}.medium-editor-toolbar li .medium-editor-button-last{border-bottom-right-radius:6px;border-right:none;border-top-right-radius:6px}.medium-editor-toolbar-form{background:#2f1e07;border-radius:6px;color:#ffedd5}.medium-editor-toolbar-form .medium-editor-toolbar-input{background:#2f1e07;color:#ffedd5;height:60px}.medium-editor-toolbar-form .medium-editor-toolbar-input::-webkit-input-placeholder{color:#ffedd5;color:rgba(255,237,213,.8)}.medium-editor-toolbar-form .medium-editor-toolbar-input:-moz-placeholder{color:#ffedd5;color:rgba(255,237,213,.8)}.medium-editor-toolbar-form .medium-editor-toolbar-input::-moz-placeholder{color:#ffedd5;color:rgba(255,237,213,.8)}.medium-editor-toolbar-form .medium-editor-toolbar-input:-ms-input-placeholder{color:#ffedd5;color:rgba(255,237,213,.8)}.medium-editor-toolbar-form a{color:#ffedd5}.medium-editor-toolbar-anchor-preview{background:#2f1e07;border-radius:6px;color:#ffedd5}.medium-editor-placeholder:after{color:#5b3a0e}
+    </style>
+</head>
+<body>
+
+
+    <div id="medium-sample" class="editable">
+        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusamus at beatae dicta eius esse eveniet ex
+            facilis fugit illum libero maxime modi, nemo optio praesentium quas, qui repellat temporibus,
+            voluptatum?</p>
+        <p>
+            https://www.instagram.com/p/BJKMRbrBXeE/
+        </p>
+        <p>
+            <strong>just higlight url and click embed button from toolbar!</strong>
+        </p>
+        <p>At cumque dolorem eaque eos excepturi id, illo illum ipsam iure laborum minus nemo nesciunt nobis, officia
+            qui rerum sed sit unde vel voluptates? Ducimus fuga illo laboriosam nam rem?</p>
+        <p>Accusantium alias aliquid animi assumenda, consequuntur corporis facere illum ipsam laborum magnam
+            necessitatibus omnis placeat quibusdam reiciendis, repudiandae sit suscipit tenetur veniam. Ab beatae
+            distinctio hic id porro recusandae, ut?</p>
+        <p>Ad aliquam at atque consequatur cupiditate debitis dolorem doloremque earum eligendi error, id illo impedit
+            iusto laboriosam nesciunt nihil nostrum numquam obcaecati omnis recusandae similique sit totam vero
+            voluptatibus voluptatum!</p>
+        <p>Ipsa ipsum laboriosam omnis possimus quaerat! Amet architecto ea, ex fuga laboriosam magni molestiae
+            molestias perferendis tempore voluptates. Aperiam assumenda aut culpa facere inventore maiores nam quam quas
+            sequi sint.</p>
+    </div>
+
+    <script src="//cdn.jsdelivr.net/medium-editor/latest/js/medium-editor.min.js"></script>
+    <script type="text/javascript" src="../js/medium-editor-embed-button.min.js"></script>
+    <script  type="text/javascript">
+        var editor = new MediumEditor('.editable', {
+            buttonLabels: 'fontawesome',
+            extensions: {
+                embedButton: new EmbedButtonExtension({
+                    embedOpts: {
+                        oembedProxy: "http://iframe.ly/api/oembed?api_key=3bef8c4238179ff9306315&url="
+                    }
+                })
+            },
+            toolbar: {
+                buttons: [
+                    'h2',
+                    'bold',
+                    'italic',
+                    'unorderedlist',
+                    'orderedlist',
+                    'embedButton'
+                ]
+            }
+        });
+    </script>
+
+</body>
+</html>

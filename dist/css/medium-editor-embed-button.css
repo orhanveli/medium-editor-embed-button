@@ -1,0 +1,16 @@
+.medium-editor-embeds {
+  position: relative;
+  padding-bottom: 1.5em; }
+  .medium-editor-embeds blockquote, .medium-editor-embeds iframe {
+    margin: 0 auto !important;
+    z-index: 1; }
+  .medium-editor-embeds .medium-editor-embeds-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2; }
+  .medium-editor-embeds.medium-editor-embeds-selected .medium-editor-embeds-overlay {
+    opacity: 0.2;
+    background-color: aquamarine; }

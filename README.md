@@ -11,7 +11,7 @@ Reference script to page, create an MediumEditor instance with extension config.
         var editor = new MediumEditor('.editable', {
             buttonLabels: 'fontawesome',
             extensions: {
-                table: new EmbedButtonExtension()
+                embedButton: new EmbedButtonExtension()
             },
             toolbar: {
                 buttons: [

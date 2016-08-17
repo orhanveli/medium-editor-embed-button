@@ -6,7 +6,12 @@ You can embed any oEmbed supported media to your document by just
 * click **E** button, that's it!
 
 ## how to use
-Reference script to page, create an MediumEditor instance with extension config.
+Reference script and styleshhet to page
+
+    <link rel="stylesheet" href="/path/to/medium-editor-embed-button.min.css" type="text/css" media="screen" charset="utf-8">
+    <script type="text/javascript" src="/path/to/medium-editor-embed-button.min.js"></script>
+
+and create an MediumEditor instance with extension config.
 
         var editor = new MediumEditor('.editable', {
             buttonLabels: 'fontawesome',

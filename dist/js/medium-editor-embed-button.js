@@ -25,8 +25,8 @@
             "cssSelected": "medium-editor-embeds-selected",
             "instagramEmbedScript": "//platform.instagram.com/en_US/embeds.js",
             "twitterEmbedScripts": "//platform.twitter.com/widgets.js",
-            "facebookEmbedScripts": "//connect.facebook.net/en_US/sdk.js",
-            "youtubeEmbedScripts": "",
+            "facebookEmbedScripts": "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.7",
+            "ifrmelyEmbedScript": "//cdn.iframe.ly/embed.js",
             "vimeoEmbedScripts": ""
         },
 
@@ -158,7 +158,9 @@
                     cleanAttrs: [],
                     cleanTags: []
                 });
-            this.on(self.document.getElementById(id), "click", this.selectEmbed.bind(this));
+            var $overlay = self.document.getElementById(id).querySelector("." + self.opts.cssEmbedOverlay);
+            this.on($overlay, "click", this.selectEmbed.bind(this));
+            self.loadIfIframely();
 
             if (data.url.indexOf("instagr") > -1) {
                 if (typeof (window.instgrm) === "undefined") {
@@ -166,11 +168,13 @@
                     return;
                 }
                 window.instgrm.Embeds.process();
-            } else if (data.url.indexOf("facebook") > -1 && typeof (window.FB) !== 'undefined') {
+            } else if (data.url.indexOf("facebook") > -1) {
+                if (typeof (window.FB) === "undefined") {
+                    self.injectScript(self.opts.facebookEmbedScripts);
+                }
                 setTimeout(function() {
-                        window.FB.XFBML.parse();
-                    },
-                    1500);
+                    window.FB.XFBML.parse();
+                }, 1000);
             } else if (data.url.indexOf("twitter") > -1) {
                 if (typeof (window.twttr) === "undefined") {
                     self.injectScript(self.opts.twitterEmbedScripts);
@@ -179,6 +183,12 @@
                 window.twttr.widgets.load();
             }
 
+        },
+
+        "loadIfIframely": function() {
+            if (typeof this.opts.oembedProxy !== "undefined" && this.opts.oembedProxy.indexOf("iframely")) {
+                this.injectScript(this.opts.ifrmelyEmbedScript);
+            }
         },
 
         "selectEmbed": function(e) {

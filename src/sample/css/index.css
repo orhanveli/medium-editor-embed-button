@@ -1,0 +1,42 @@
+@import 'https://fonts.googleapis.com/css?family=Lora:400,400i,700,700i|Open+Sans:400,600,800';
+
+body {
+    padding: 2em 0;
+    font-family: 'Open Sans', sans-serif;
+    background-color: #efefef;
+}
+
+a {
+    color: tomato;
+    text-decoration: underline;
+}
+
+a:visited {
+    color: #ff7167;
+}
+
+a:hover, a:active, a:focus {
+    color: #ff5200;
+}
+
+#container {
+    max-width: 90%;
+    margin: 0 auto;
+}
+
+#header {
+    margin-bottom: 1em;
+}
+
+#content-body {
+
+}
+
+#medium-sample {
+    font-family: 'Lora', serif;
+    font-size: 1.4em;
+    padding: 1em;
+    background-color: #fff;
+    margin: 0 -5%;
+    outline:none;
+}

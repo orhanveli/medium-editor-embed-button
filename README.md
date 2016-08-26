@@ -7,6 +7,11 @@ Check this [demo](https://orhanveli.github.io/)
 * highlight it
 * click **E** button, that's it!
 
+## installation
+You can install via bower
+
+    $ bower install medium-editor-embed-button
+
 ## how to use
 Reference script and styleshhet to page
 

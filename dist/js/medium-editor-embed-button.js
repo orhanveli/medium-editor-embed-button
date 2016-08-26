@@ -162,6 +162,9 @@
             this.on($overlay, "click", this.selectEmbed.bind(this));
             self.loadIfIframely();
 
+            /**
+             * hede comment
+             */
             if (data.url.indexOf("instagr") > -1) {
                 if (typeof (window.instgrm) === "undefined") {
                     self.injectScript(self.opts.instagramEmbedScript);

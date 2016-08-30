@@ -119,6 +119,7 @@
 
             self.ajaxGet(self.opts.oembedProxy + selectedText,
                 function(data) {
+                    range.deleteContents();
                     self.insertEmbed(data);
                 });
 
@@ -160,11 +161,20 @@
                 });
             var $overlay = self.document.getElementById(id).querySelector("." + self.opts.cssEmbedOverlay);
             this.on($overlay, "click", this.selectEmbed.bind(this));
+
+            self.parseSiteSpecific(data);
+        },
+
+        "loadIfIframely": function() {
+            if (typeof this.opts.oembedProxy !== "undefined" && this.opts.oembedProxy.indexOf("iframely")) {
+                this.injectScript(this.opts.ifrmelyEmbedScript);
+            }
+        },
+
+        "parseSiteSpecific": function (data) {
+            var self = this;
             self.loadIfIframely();
 
-            /**
-             * hede comment
-             */
             if (data.url.indexOf("instagr") > -1) {
                 if (typeof (window.instgrm) === "undefined") {
                     self.injectScript(self.opts.instagramEmbedScript);
@@ -184,13 +194,6 @@
                     return;
                 }
                 window.twttr.widgets.load();
-            }
-
-        },
-
-        "loadIfIframely": function() {
-            if (typeof this.opts.oembedProxy !== "undefined" && this.opts.oembedProxy.indexOf("iframely")) {
-                this.injectScript(this.opts.ifrmelyEmbedScript);
             }
         },
 

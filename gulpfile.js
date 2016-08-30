@@ -2,15 +2,16 @@
  * Created by orhanveli on 26/08/16.
  */
 
-var gulp = require('gulp'),
-    sass = require('gulp-sass'),
-    useref = require('gulp-useref'),
-    uglify = require('gulp-uglify'),
-    cssnano = require('gulp-cssnano'),
-    gulpIf = require('gulp-if'),
+var gulp = require("gulp"),
+    sass = require("gulp-sass"),
+    useref = require("gulp-useref"),
+    uglify = require("gulp-uglify"),
+    cssnano = require("gulp-cssnano"),
+    gulpIf = require("gulp-if"),
     rename = require("gulp-rename"),
-    sourcemaps = require('gulp-sourcemaps'),
-    runSequence = require('run-sequence');
+    sourcemaps = require("gulp-sourcemaps"),
+    runSequence = require("run-sequence"),
+    webserver = require("gulp-webserver");
 
 
 function minJsTask(){
@@ -50,12 +51,23 @@ function watchTask(){
     gulp.watch("src/scss/**/*.scss", ["sass"]);
 }
 
+function webserverTask(){
+    gulp.src("src")
+        .pipe(webserver({
+            livereload: true,
+            directoryListing: true,
+            port: 8088,
+            open: "http://localhost:8088/sample/index.html"
+        }));
+}
+
 gulp.task("min:js", minJsTask);
 gulp.task("min:css", ["sass"], minCssTask);
 gulp.task("min", ["min:css", "min:js"]);
 gulp.task("sass", sassTask);
 gulp.task("useref", ["sass"], userefTask);
 gulp.task("watch", watchTask);
+gulp.task("serve", webserverTask);
 
 gulp.task("dist", ["useref"], function(){
     runSequence("useref", "min");

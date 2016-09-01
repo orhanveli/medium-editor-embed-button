@@ -38,6 +38,13 @@
                 doc = self.document,
                 $embeds = doc.querySelectorAll("." + self.opts.cssEmbeds);
 
+            this.base._originalSerializerPreEmbeds = self.base.serialize;
+            this.base.serialize = self.embedSerialize;
+            this.attachEvents();
+
+            if (typeof $embeds === "undefined" || $embeds === null || $embeds.length === 0) {
+                return;
+            }
 
             for (var i = 0; i < $embeds.length; i++) {
                 var $elem = $embeds[i];
@@ -46,22 +53,12 @@
                     self.appendOverlay($elem);
                 }
             }
-
-            this.base._originalSerializerPreEmbeds = self.base.serialize;
-            this.base.serialize = self.embedSerialize;
-
-            this.attachEvents();
         },
 
         "attachEvents": function() {
             this.on(this.document, "click", this.unselectEmbed.bind(this));
             var $allEmbeds = this.document.querySelectorAll("." + this.opts.cssEmbedOverlay);
-            this.on($allEmbeds,
-                "click",
-                this.selectEmbed.bind(this));
-
-            if($allEmbeds !== null) {
-            }
+            this.on($allEmbeds, "click", this.selectEmbed.bind(this));
             this.on(this.document, "keydown", this.removeEmbed.bind(this));
             this.on(this.base.elements, "keydown", this.deleteEmbedOnBackspaceAndDel.bind(this));
         },
@@ -223,12 +220,12 @@
                 $target = e.target,
                 $embeds = self.document.querySelectorAll("." + self.opts.cssEmbeds);
 
-            if ($embeds.length === 0) {
-                return false;
+            if (typeof $embeds === "undefined" || $embeds === null || $embeds.length === 0) {
+                return;
             }
 
             if ($target.classList.contains(self.opts.cssEmbedOverlay)) {
-                return false;
+                return;
             }
 
             //clear all selecteds
@@ -306,7 +303,8 @@
                 $data.innerHTML = obj.value;
 
                 var $embeds = $data.querySelectorAll("." + embedExtension.opts.cssEmbeds);
-                if ($embeds !== null) {
+
+                if (typeof $embeds !== "undefined" && $embeds !== null && $embeds.length > 0) {
                     $embeds.forEach(function ($embed) {
                         $embed.removeAttribute("contenteditable");
                         $embed.classList.remove(embedExtension.opts.cssSelected);

@@ -305,14 +305,15 @@
                 var $embeds = $data.querySelectorAll("." + embedExtension.opts.cssEmbeds);
 
                 if (typeof $embeds !== "undefined" && $embeds !== null && $embeds.length > 0) {
-                    $embeds.forEach(function ($embed) {
+                    for (i = 0;  i < $embeds.length; i++) {
+                        var $embed = $embeds[i];
                         $embed.removeAttribute("contenteditable");
                         $embed.classList.remove(embedExtension.opts.cssSelected);
                         var $overlay = $embed.querySelector("." + embedExtension.opts.cssEmbedOverlay);
                         if ($overlay !== null) {
                             $overlay.parentElement.removeChild($overlay);
                         }
-                    });
+                    }
                 }
                 data[key].value = $data.innerHTML;
             }

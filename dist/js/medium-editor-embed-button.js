@@ -303,7 +303,7 @@
                 $data.innerHTML = obj.value;
 
                 var $embeds = $data.querySelectorAll("." + embedExtension.opts.cssEmbeds);
-                // removed forEach logic
+
                 if (typeof $embeds !== "undefined" && $embeds !== null && $embeds.length > 0) {
                     for (i = 0;  i < $embeds.length; i++) {
                         var $embed = $embeds[i];

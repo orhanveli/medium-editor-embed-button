@@ -305,7 +305,7 @@
                 var $embeds = $data.querySelectorAll("." + embedExtension.opts.cssEmbeds);
 
                 if (typeof $embeds !== "undefined" && $embeds !== null && $embeds.length > 0) {
-                    for (var i = 0; i++; i < $embeds.length) {
+                    for (i = 0;  i < $embeds.length; i++) {
                         var $embed = $embeds[i];
                         $embed.removeAttribute("contenteditable");
                         $embed.classList.remove(embedExtension.opts.cssSelected);

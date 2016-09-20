@@ -62,6 +62,14 @@
                     sequi sint.</p>
             </div>
 
+            <div>
+                <h2>Serialized Result</h2>
+                <pre id="serialized-example">Not serialized yet!</pre>
+                <p>
+                    <button id="serialize">Serialize</button>
+                </p>
+            </div>
+
         </div>
     </div>
 
@@ -93,6 +101,16 @@
                 ]
             }
         });
+
+        var $exampleContainer = document.getElementById("serialized-example"),
+            $serializeButton = document.getElementById("serialize");
+
+        $serializeButton.addEventListener("click", function (e) {
+            e.preventDefault();
+            var result = editor.serialize();
+            $exampleContainer.innerText = result["medium-sample"].value;
+        })
+
     </script>
 
 </body>

@@ -48,7 +48,7 @@ function userefTask(){
 }
 
 function watchTask(){
-    gulp.watch("src/scss/**/*.scss", ["sass"]);
+    gulp.watch(["src/scss/**/*.scss", "src/js/**/*.js", "src/sample/**/*"], ["dist"]);
 }
 
 function webserverTask(){
@@ -69,6 +69,6 @@ gulp.task("useref", ["sass"], userefTask);
 gulp.task("watch", watchTask);
 gulp.task("serve", webserverTask);
 
-gulp.task("dist", ["useref"], function(){
+gulp.task("dist", function(){
     runSequence("useref", "min");
 });

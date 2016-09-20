@@ -5,6 +5,76 @@
 (function (window, document, MediumEditor) {
     "use strict";
 
+
+
+// replace namesLikeThis with names-like-this
+    function toDashed(name) {
+        return name.replace(/([A-Z])/g, function(u) {
+            return "-" + u.toLowerCase();
+        });
+    }
+
+    var fn;
+
+    if (typeof document !== "undefined" && document.head && document.head.dataset) {
+        fn = {
+            set: function(node, attr, value) {
+                node.dataset[attr] = value;
+            },
+            get: function(node, attr) {
+                return node.dataset[attr];
+            },
+            del: function (node, attr) {
+                delete node.dataset[attr];
+            }
+        };
+    } else {
+        fn = {
+            set: function(node, attr, value) {
+                node.setAttribute('data-' + toDashed(attr), value);
+            },
+            get: function(node, attr) {
+                return node.getAttribute('data-' + toDashed(attr));
+            },
+            del: function (node, attr) {
+                node.removeAttribute('data-' + toDashed(attr));
+            }
+        };
+    }
+
+    function dataset(node, attr, value) {
+        var self = {
+            set: set,
+            get: get,
+            del: del
+        };
+
+        function set(attr, value) {
+            fn.set(node, attr, value);
+            return self;
+        }
+
+        function del(attr) {
+            fn.del(node, attr);
+            return self;
+        }
+
+        function get(attr) {
+            return fn.get(node, attr);
+        }
+
+        if (arguments.length === 3) {
+            return set(attr, value);
+        }
+        if (arguments.length == 2) {
+            return get(attr);
+        }
+
+        return self;
+    }
+
+
+
     if (typeof MediumEditor !== "function") {
         throw new Error("Medium Editor is not loaded on the page.");
     }
@@ -53,6 +123,7 @@
                     self.appendOverlay($elem);
                 }
             }
+
         },
 
         "attachEvents": function() {
@@ -148,6 +219,9 @@
 
             $wrapper.setAttribute("id", id);
             $wrapper.setAttribute("contenteditable", false);
+
+            dataset($wrapper, "originalResponse", JSON.stringify(data));
+
             $wrapper.className = self.opts.cssEmbeds;
             $wrapper.innerHTML = data.html;
             self.appendOverlay($wrapper);
@@ -170,7 +244,6 @@
 
         "parseSiteSpecific": function (data) {
             var self = this;
-            self.loadIfIframely();
 
             if (data.url.indexOf("instagr") > -1) {
                 if (typeof (window.instgrm) === "undefined") {
@@ -191,6 +264,9 @@
                     return;
                 }
                 window.twttr.widgets.load();
+            }
+            else {
+                self.loadIfIframely();
             }
         },
 
@@ -305,14 +381,22 @@
                 var $embeds = $data.querySelectorAll("." + embedExtension.opts.cssEmbeds);
 
                 if (typeof $embeds !== "undefined" && $embeds !== null && $embeds.length > 0) {
-                    for (i = 0;  i < $embeds.length; i++) {
+                    for (var i = 0;  i < $embeds.length; i++) {
                         var $embed = $embeds[i];
+                        var responseData = dataset($embed, "originalResponse");
+                        if (responseData && null !== responseData) {
+                            var originalData = JSON.parse(responseData);
+                            $embed.innerHTML = originalData.html;
+                            dataset($embed).del("originalResponse");
+                        }
+                        else { //Back compatibility
+                            var $overlay = $embed.querySelector("." + embedExtension.opts.cssEmbedOverlay);
+                            if ($overlay !== null) {
+                                $overlay.parentElement.removeChild($overlay);
+                            }
+                        }
                         $embed.removeAttribute("contenteditable");
                         $embed.classList.remove(embedExtension.opts.cssSelected);
-                        var $overlay = $embed.querySelector("." + embedExtension.opts.cssEmbedOverlay);
-                        if ($overlay !== null) {
-                            $overlay.parentElement.removeChild($overlay);
-                        }
                     }
                 }
                 data[key].value = $data.innerHTML;

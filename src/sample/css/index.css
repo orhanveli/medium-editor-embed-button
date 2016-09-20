@@ -40,3 +40,11 @@ a:hover, a:active, a:focus {
     margin: 0 -5%;
     outline:none;
 }
+
+#serialized-example {
+    margin: 0 -5%;
+    background-color: #555555;
+    color: #fff;
+    padding: 1em;
+    overflow: auto;
+}

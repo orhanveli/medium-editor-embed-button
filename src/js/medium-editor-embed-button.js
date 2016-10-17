@@ -387,7 +387,11 @@
                         if (responseData && null !== responseData) {
                             var originalData = JSON.parse(responseData);
                             $embed.innerHTML = originalData.html;
-                            dataset($embed).del("originalResponse");
+                            var simpleData = {
+                                "html": originalData.html,
+                                "url": originalData.url
+                            };
+                            dataset($embed).set("originalResponse", JSON.stringify(simpleData));
                         }
                         else { //Back compatibility
                             var $overlay = $embed.querySelector("." + embedExtension.opts.cssEmbedOverlay);

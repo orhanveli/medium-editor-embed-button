@@ -1,27 +1,105 @@
 
 .medium-editor-embeds {
-    position: relative;
-    padding-bottom: 1.5em;
+  position: relative;
+  padding-bottom: 1.5em;
 
-    blockquote, iframe {
-        margin: 0 auto !important;
-        z-index: 1;
-    }
+  blockquote, iframe {
+    margin: 0 auto !important;
+    z-index: 1;
+  }
 
+  .medium-editor-embeds-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+  }
+
+  &.medium-editor-embeds-selected {
     .medium-editor-embeds-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        z-index: 2;
+      opacity: 0.2;
+      background-color: aquamarine;
     }
+  }
+}
 
-    &.medium-editor-embeds-selected {
-        .medium-editor-embeds-overlay {
-            opacity: 0.2;
-            background-color: aquamarine;
-        }
+.medium-editor-embeds__modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  z-index: 9999;
+}
+.medium-editor-embeds__modal-inner {
+  position: relative;
+  background-color: #fff;
+  color: #000;
+  box-shadow: 0px 0px 40px rgba(0,0,0, 0.2);
+  border: 1px solid #ccc;
+  width: 90%;
+  max-width: 600px;
+  margin: 5em auto;
+}
+.medium-editor-embeds__modal-header {
+  padding: 1em;
+
+  h2 {
+    font-size: 24px;
+    line-height: 1em;
+    margin: 0;
+    padding: 0;
+  }
+}
+
+.medium-editor-embeds__modal-body {
+  padding: 0 1em;
+}
+.medium-editor-embeds__modal-footer {
+  padding: 1em;
+  text-align: right;
+
+  button {
+    display: inline-block;
+    font-weight: 400;
+    font-size: 14px;
+    text-decoration: inherit;
+    padding: 0.5em 1em;
+    background-color: rgb(52,168,200);
+    color: rgb(235,255,255);
+    border: 1px solid rgb(52,168,200);
+    text-shadow: rgba(0,0,0, 0.2) 0px 1px;
+    cursor: pointer;
+    border-radius: 2px;
+
+    &:hover {
+      background-color: rgb(49, 178, 200);
     }
+  }
 
+  button + button {
+    margin-left: 15px;
+  }
+}
+
+.medium-editor-embeds__modal-close,
+.medium-editor-embeds__modal-close:visited,
+.medium-editor-embeds__modal-close:active,
+.medium-editor-embeds__modal-close:focus,
+.medium-editor-embeds__modal-close:hover{
+  display: inline-block;
+  position: absolute;
+  right: 0;
+  top: -40px;
+  white-space: nowrap;
+  overflow: hidden;
+  cursor: pointer;
+  color: #ccc;
+  font-size: 36px;
+  line-height: 1em;
+  text-decoration: none;
+  border-radius: 25%;
 }

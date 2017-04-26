@@ -12,6 +12,10 @@ You can install via bower
 
     $ bower install medium-editor-embed-button
 
+... or npm
+
+    $ npm install medium-editor-embed-button
+
 ## how to use
 Reference script and stylesheet to page
 
@@ -42,3 +46,20 @@ and try it :)
 Don't hesitate to contribute.
 
 cheers!
+
+## Changelog
+
+### Apr 26, 2017 (v1.3.0)
+- oembed service (embedly, iframely etc) support improvements
+- added twitter embed customization options for embed as video and don't include conversation
+- various bugfixes
+- AMD and CommonJS module compatibility
+- npm registration made according to requests 
+
+### Aug 22, 2016
+- bower register
+
+### Aug 18, 2016
+- iframely embed script support added
+- added demo to readme
+- added some missing info to readme

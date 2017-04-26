@@ -32,13 +32,17 @@ a:hover, a:active, a:focus {
 
 }
 
-#medium-sample {
+.editable {
     font-family: 'Lora', serif;
     font-size: 1.4em;
     padding: 1em;
     background-color: #fff;
     margin: 0 -5%;
     outline:none;
+}
+
+.editable + .editable {
+    margin-top: 2em;
 }
 
 #serialized-example {

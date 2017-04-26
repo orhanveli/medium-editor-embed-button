@@ -55,10 +55,10 @@ coverage
 build/Release
 
 # Dependency directories
-node_modules
+node_modules/
 jspm_packages
-bower_components
-src/bower_components
+bower_components/
+src/bower_components/
 
 # Optional npm cache directory
 .npm
@@ -67,6 +67,7 @@ src/bower_components
 .node_repl_history
 ### JetBrains template
 .idea/
+!.idea/watcherTasks.xml
 
 ## File-based project format:
 *.iws

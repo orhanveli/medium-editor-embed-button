@@ -5,9 +5,93 @@
 (function (window, document, MediumEditor) {
     "use strict";
 
+    function serializeFormData (form) {
+        if (!form || form.nodeName !== "FORM") {
+            return;
+        }
+        var j, q = {};
+        Array.prototype.slice.call(form.elements).forEach(function(control) {
+            if (control.name === "") {
+                return;
+            }
+            switch (control.nodeName) {
+                case 'INPUT':
+                    switch (control.type) {
+                        case 'text':
+                        case 'hidden':
+                        case 'password':
+                        case 'button':
+                        case 'reset':
+                        case 'submit':
+                            q[control.name] = control.value;
+                            break;
+                        case 'checkbox': //multiple choice checkbox ignored
+                        case 'radio':
+                            if (control.checked) {
+                                q[control.name] = control.value;
+                            }
+                            break;
+                    }
+                    break;
+                case 'file':
+                    break;
+                case 'TEXTAREA':
+                    q[control.name] = control.value;
+                    break;
+                case 'SELECT':
+                    switch (control.type) {
+                        case 'select-one':
+                            q[control.name] = control.value;
+                            break;
+                        case 'select-multiple':
+                            var multiVal = [];
+                            for (j = control.options.length - 1; j >= 0; j = j - 1) {
+                                if (control.options[j].selected) {
+                                    multiVal.push(control.options[j].value);
+                                }
+                            }
+                            q[control.name] = multiVal;
+                            break;
+                    }
+                    break;
+                case 'BUTTON':
+                    switch (control.type) {
+                        case 'reset':
+                        case 'submit':
+                        case 'button':
+                            q[control.name] = control.value;
+                            break;
+                    }
+                    break;
+            }
+        });
+        return q;
+    }
 
+    function TemplateEngine(html, options) {
+        var re = /<%(.+?)%>/g,
+            reExp = /(^( )?(var|if|for|else|switch|case|break|{|}|;))(.*)?/g,
+            code = 'with(obj) { var r=[];\n',
+            cursor = 0,
+            result,
+            match;
+        var add = function(line, js) {
+            js? (code += line.match(reExp) ? line + '\n' : 'r.push(' + line + ');\n') :
+                (code += line != '' ? 'r.push("' + line.replace(/"/g, '\\"') + '");\n' : '');
+            return add;
+        }
+        while(match = re.exec(html)) {
+            add(html.slice(cursor, match.index))(match[1], true);
+            cursor = match.index + match[0].length;
+        }
+        add(html.substr(cursor, html.length - cursor));
+        code = (code + 'return r.join(""); }').replace(/[\r\t\n]/g, ' ');
+        try { result = new Function('obj', code).apply(options, [options]); }
+        catch(err) { console.error("'" + err.message + "'", " in \n\nCode:\n", code, "\n"); }
+        return result;
+    }
 
-// replace namesLikeThis with names-like-this
+    // replace namesLikeThis with names-like-this
     function toDashed(name) {
         return name.replace(/([A-Z])/g, function(u) {
             return "-" + u.toLowerCase();
@@ -74,7 +158,6 @@
     }
 
 
-
     if (typeof MediumEditor !== "function") {
         throw new Error("Medium Editor is not loaded on the page.");
     }
@@ -87,16 +170,24 @@
         "aria": "Embed media",
 
         "defaults": {
-            "msgSelectOnlyUrl": "Seçtiğiniz metin geçerli bir URL değil!",
-            "msgSelectOnlyEmbadableUrl": "Seçtiğiniz URL desteklenmiyor!",
+            "msgSelectOnlyUrl": "Selected text is not a valid URL!",
+            "msgSelectOnlyEmbadableUrl": "Selected URL is not supported!",
+            "msgMakeItVideoEmbed": "Embed video",
+            "msgTwitterEmbedModalTitle": "Twitter Embed Options",
+            "msgHideTweetStatusMessage": "Hide tweet text",
+            "msgInsertEmbed": "Embed ekle",
+
             "oembedProxy": "http://iframe.ly/api/oembed?api_key=APIKEY_HERE&url=",
+
             "cssEmbedOverlay": "medium-editor-embeds-overlay",
             "cssEmbeds": "medium-editor-embeds",
             "cssSelected": "medium-editor-embeds-selected",
+            "cssEmbedModal": "medium-editor-embeds__modal",
+
             "instagramEmbedScript": "//platform.instagram.com/en_US/embeds.js",
             "twitterEmbedScripts": "//platform.twitter.com/widgets.js",
             "facebookEmbedScripts": "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.7",
-            "ifrmelyEmbedScript": "//cdn.iframe.ly/embed.js",
+            "iframelyEmbedScript": "//cdn.iframe.ly/embed.js",
             "vimeoEmbedScripts": ""
         },
 
@@ -110,25 +201,35 @@
 
             this.base._originalSerializerPreEmbeds = self.base.serialize;
             this.base.serialize = self.embedSerialize;
+
+            this.base.embedModal = null;
+
             this.attachEvents();
 
             if (typeof $embeds === "undefined" || $embeds === null || $embeds.length === 0) {
                 return;
             }
 
-            for (var i = 0; i < $embeds.length; i++) {
-                var $elem = $embeds[i];
+            var allEmbeds = [];
+
+            for (var i = 0; i < self.base.elements.length; i++) {
+                var $edtr = self.base.elements[i],
+                    innerEmbeds = $edtr.querySelectorAll("." + self.opts.cssEmbeds);
+                allEmbeds = allEmbeds.concat(Array.prototype.slice.call(innerEmbeds));
+            }
+
+            for (var i = 0; i < allEmbeds.length; i++) {
+                var $elem = allEmbeds[i];
                 $elem.setAttribute("contenteditable", false);
                 if ($elem.querySelector("." + self.opts.cssEmbedOverlay) === null) {
                     self.appendOverlay($elem);
                 }
             }
-
         },
 
         "attachEvents": function() {
             this.on(this.document, "click", this.unselectEmbed.bind(this));
-            var $allEmbeds = this.document.querySelectorAll("." + this.opts.cssEmbedOverlay);
+            var $allEmbeds = this.document.querySelectorAll("." + this.opts.cssEmbeds);
             this.on($allEmbeds, "click", this.selectEmbed.bind(this));
             this.on(this.document, "keydown", this.removeEmbed.bind(this));
             this.on(this.base.elements, "keydown", this.deleteEmbedOnBackspaceAndDel.bind(this));
@@ -162,7 +263,8 @@
         "handleClick": function(e) {
             e.preventDefault();
             e.stopPropagation();
-            var self = this;
+            var self = this,
+                formData = {};
 
             var range = MediumEditor.selection.getSelectionRange(self.document);
 
@@ -179,19 +281,116 @@
             }
 
             var selectedText = this.getSelection();
+            self.base.saveSelection();
 
-            if (selectedText.indexOf("http") < 0) {
+            if (selectedText.indexOf("http:") < 0 && selectedText.indexOf("https:") < 0 ) {
                 alert(self.opts.msgSelectOnlyUrl);
                 return false;
             }
 
-            self.ajaxGet(self.opts.oembedProxy + selectedText,
-                function(data) {
-                    range.deleteContents();
-                    self.insertEmbed(data);
-                });
+            formData.selectedText = selectedText;
 
-            self.base.checkContentChanged();
+            if (selectedText.indexOf("twitter") > -1) {
+                formData.embedSource = "twitter";
+                self.openEmbedModal(formData);
+                return;
+            }
+            else if (selectedText.indexOf("youtube") > -1) {
+                formData.embedSource = "youtube";
+            }
+            else if (selectedText.indexOf("instagram") > -1) {
+                formData.embedSource = "instagram";
+            }
+
+            self.getAjaxResultAndPaste(range, formData);
+        },
+
+        "openEmbedModal": function (formData) {
+            var self = this,
+                doc = self.document,
+                $modal = doc.createElement("div");
+
+            var template =
+                '<div class="<%cssEmbedModal%>">' +
+                    '<div class="<%cssEmbedModalInner%>">' +
+                        '<a href="" class="<%cssEmbedModalClose%>">&times;</a>' +
+                        '<div class="<%cssEmbedModalHeader%>">' +
+                            '<h2><%msgTwitterEmbedModalTitle%></h2>' +
+                        '</div>' +
+                        '<div class="<%cssEmbedModalBody%>">' +
+                            '<form class="<%cssEmbedModalForm%>">' +
+                                '<input type="hidden" name="selectedText" value="<%selectedText%>" />' +
+                                '<input type="hidden" name="embedSource" value="<%embedSource%>" />';
+
+            switch (formData.embedSource) {
+                case "twitter":
+                    template += '<p><label>' +
+                        '<input type="checkbox" name="tweetAsVideo" value="true" />' +
+                        ' <%msgMakeItVideoEmbed%>' +
+                        '</label></p>' +
+                        '<p><label>';
+                    break;
+            }
+
+            template += '</form>' +
+                        '</div>' +
+                        '<div class="<%cssEmbedModalFooter%>">' +
+                            '<button class="<%cssEmbedModal%>-submit"><%msgInsertEmbed%></button>' +
+                        '</div>' +
+                '</div>' +
+                '</div>';
+
+            var modalInner = TemplateEngine(template, {
+                "cssEmbedModal": self.opts.cssEmbedModal,
+                "cssEmbedModalInner": self.opts.cssEmbedModal + "-inner",
+                "cssEmbedModalClose": self.opts.cssEmbedModal + "-close",
+                "cssEmbedModalHeader": self.opts.cssEmbedModal + "-header",
+                "cssEmbedModalBody": self.opts.cssEmbedModal + "-body",
+                "cssEmbedModalForm": self.opts.cssEmbedModal + "-form",
+                "cssEmbedModalFooter": self.opts.cssEmbedModal + "-footer",
+
+                "selectedText": formData.selectedText,
+                "embedSource": formData.embedSource,
+
+                "msgMakeItVideoEmbed": self.opts.msgMakeItVideoEmbed,
+                "msgTwitterEmbedModalTitle": self.opts.msgTwitterEmbedModalTitle,
+                "msgInsertEmbed": self.opts.msgInsertEmbed,
+                "msgHideTweetStatusMessage": self.opts.msgHideTweetStatusMessage
+            });
+            $modal.innerHTML = modalInner;
+
+            this.base.embedModal = $modal;
+            doc.body.appendChild($modal);
+            var $closeButton = $modal.querySelector("." + self.opts.cssEmbedModal + "-close"),
+                $submitButton = $modal.querySelector("." + self.opts.cssEmbedModal + "-submit");
+            this.on($closeButton, "click", this.closeAndDestroyModal.bind(this));
+            this.on($submitButton, "click", this.submitEmbedModal.bind(this));
+        },
+
+        "closeAndDestroyModal": function (e) {
+            e.preventDefault();
+            var self = this,
+                doc = self.document,
+                $modal = doc.querySelector("." + self.opts.cssEmbedModal);
+
+            this.base.embedModal = null;
+            if ($modal !== undefined) {
+                $modal.parentNode.removeChild($modal);
+            }
+        },
+
+        "submitEmbedModal": function (e) {
+            e.preventDefault();
+            var self = this,
+                doc = self.document,
+                $modal = doc.querySelector("." + self.opts.cssEmbedModal),
+                $form = $modal.querySelector("form"),
+                range = MediumEditor.selection.getSelectionRange(self.document);
+
+            var formData = serializeFormData($form);
+
+            self.getAjaxResultAndPaste(range, formData);
+            self.closeAndDestroyModal(e);
         },
 
         "getSelection": function() {
@@ -212,13 +411,45 @@
             $elem.appendChild($overlay);
         },
 
-        "insertEmbed": function(data) {
+        "getAjaxResultAndPaste": function (range, formData) {
+            var self = this,
+                endpointUri = self.opts.oembedProxy + formData.selectedText;
+
+            self.base.restoreSelection();
+
+            self.ajaxGet(endpointUri,
+                function(data) {
+                    range.deleteContents();
+                    data.url = formData.selectedText,
+                    self.insertEmbed(range, data, formData);
+                });
+        },
+
+        "insertEmbed": function(range, data, formData) {
             var self = this,
                 id = MediumEditor.util.guid(),
                 $wrapper = self.document.createElement("div");
 
             $wrapper.setAttribute("id", id);
             $wrapper.setAttribute("contenteditable", false);
+
+            if (typeof formData !== "undefined" && formData.embedSource === "twitter") {
+                if (formData.tweetAsVideo === "true") {
+                    var $tempObject = self.document.createElement("div")
+                    $tempObject.innerHTML = data.html;
+                    var $blockquote = $tempObject.querySelector("blockquote");
+                    $blockquote.classList.remove("twitter-tweet");
+                    $blockquote.classList.add("twitter-video");
+                    if (typeof formData.hideStatus !== "undefined" && formData.hideStatus === "true") {
+                        dataset($blockquote, "status", "hidden");
+                    }
+                    else {
+                        dataset($blockquote, "status", "show");
+                    }
+
+                    data.html = $blockquote.outerHTML;
+                }
+            }
 
             dataset($wrapper, "originalResponse", JSON.stringify(data));
 
@@ -230,15 +461,19 @@
                     cleanAttrs: [],
                     cleanTags: []
                 });
-            var $overlay = self.document.getElementById(id).querySelector("." + self.opts.cssEmbedOverlay);
-            this.on($overlay, "click", this.selectEmbed.bind(this));
+            var $embed = self.document.getElementById(id);
+            if ($embed !== null) {
+                var $overlay = $embed.querySelector("." + self.opts.cssEmbedOverlay);
+                this.on($overlay, "click", this.selectEmbed.bind(this));
+            }
+            self.base.checkContentChanged();
 
             self.parseSiteSpecific(data);
         },
 
         "loadIfIframely": function() {
             if (typeof this.opts.oembedProxy !== "undefined" && this.opts.oembedProxy.indexOf("iframely")) {
-                this.injectScript(this.opts.ifrmelyEmbedScript);
+                this.injectScript(this.opts.iframelyEmbedScript);
             }
         },
 
@@ -251,13 +486,13 @@
                     return;
                 }
                 window.instgrm.Embeds.process();
-            } else if (data.url.indexOf("facebook") > -1) {
-                if (typeof (window.FB) === "undefined") {
-                    self.injectScript(self.opts.facebookEmbedScripts);
-                }
-                setTimeout(function() {
-                    window.FB.XFBML.parse();
-                }, 1000);
+            // } else if (data.url.indexOf("facebook") > -1) {
+            //     if (typeof (window.FB) === "undefined") {
+            //         self.injectScript(self.opts.facebookEmbedScripts);
+            //     }
+            //     setTimeout(function() {
+            //         window.FB.XFBML.parse();
+            //     }, 1000);
             } else if (data.url.indexOf("twitter") > -1) {
                 if (typeof (window.twttr) === "undefined") {
                     self.injectScript(self.opts.twitterEmbedScripts);
@@ -427,6 +662,20 @@
 
     };
 
-    window.EmbedButtonExtension = MediumEditor.extensions.button.extend(embedButton);
-}(window, document, MediumEditor));
+    var embedExtension = MediumEditor.extensions.button.extend(embedButton);
 
+    if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
+        module.exports = embedExtension;
+    }
+    else {
+        if (typeof define === 'function' && define.amd) {
+            define([], function() {
+                return embedExtension;
+            });
+        }
+        else {
+            window.EmbedButtonExtension = embedExtension;
+        }
+    }
+
+}(window, document, MediumEditor));

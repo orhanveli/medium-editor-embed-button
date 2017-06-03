@@ -2,7 +2,7 @@
   "name": "medium-editor-embed-button",
   "version": "1.3.0",
   "description": "oEmbed support for medium-editor",
-  "main": "build",
+  "main": "src/js/medium-editor-embed-button.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "./node_modules/.bin/gulp watch",
@@ -36,5 +36,8 @@
     "gulp-webserver": "^0.9.1",
     "node-sass": "^3.8.0",
     "run-sequence": "^1.2.2"
+  },
+  "dependencies": {
+    "medium-editor": "^5.0.0"
   }
 }

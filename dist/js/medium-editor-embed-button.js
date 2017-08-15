@@ -300,6 +300,7 @@
             }
             else if (selectedText.indexOf("instagram") > -1) {
                 formData.embedSource = "instagram";
+
             }
 
             self.getAjaxResultAndPaste(range, formData);
@@ -415,6 +416,10 @@
             var self = this,
                 endpointUri = self.opts.oembedProxy + formData.selectedText;
 
+            //if (formData.embedSource === "instagram") {
+            //    endpointUri = "https://api.instagram.com/oembed/?url=" + formData.selectedText;
+            //}
+
             self.base.restoreSelection();
 
             self.ajaxGet(endpointUri,
@@ -425,6 +430,19 @@
                 });
         },
 
+        "embedFailback": function (oembedData) {
+            var self = this;
+
+            oembedData.html = oembedData.url.replace(/\n?/g, '')
+                .replace(/^((http(s)?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/(watch\?v=|v\/)?)([a-zA-Z0-9\-_]+)(.*)?$/, '<div class="video video-youtube"><iframe width="420" height="315" src="//www.youtube.com/embed/$7" frameborder="0" allowfullscreen></iframe></div>')
+                .replace(/^https?:\/\/vimeo\.com(\/.+)?\/([0-9]+)$/, '<div class="video video-vimeo"><iframe src="//player.vimeo.com/video/$2" width="500" height="281" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe></div>')
+                .replace(/^https:\/\/twitter\.com\/(\w+)\/status\/(\d+)\/?$/, '<blockquote class="twitter-tweet" align="center" lang="en"><a href="https://twitter.com/$1/statuses/$2"></a></blockquote><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>')
+                .replace(/^(https:\/\/www\.facebook\.com\/(.*))$/, '<script src="//connect.facebook.net/en_US/sdk.js#xfbml=1&amp;version=v2.2" async></script><div class="fb-post" data-href="$1"><div class="fb-xfbml-parse-ignore"><a href="$1">Loading Facebook post...</a></div></div>')
+                .replace(/^https?:\/\/instagram\.com\/p\/(.+)\/?$/, '<span class="instagram"><iframe src="//instagram.com/p/$1/embed/" width="612" height="710" frameborder="0" scrolling="no" allowtransparency="true"></iframe></span>');
+
+            return oembedData;
+        },
+
         "insertEmbed": function(range, data, formData) {
             var self = this,
                 id = MediumEditor.util.guid(),
@@ -432,6 +450,10 @@
 
             $wrapper.setAttribute("id", id);
             $wrapper.setAttribute("contenteditable", false);
+
+            if(typeof data !== "undefined" && (typeof data.html === "undefined" || data.html == null)) {
+                data = self.embedFailback(data);
+            }
 
             if (typeof formData !== "undefined" && formData.embedSource === "twitter") {
                 if (formData.tweetAsVideo === "true") {
